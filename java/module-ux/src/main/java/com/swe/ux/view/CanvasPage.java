@@ -1,7 +1,8 @@
 package com.swe.ux.view;
 
+import com.swe.canvas.mvvm.CanvasViewModel;
+import com.swe.canvas.ui.CanvasController;
 import com.swe.ux.theme.ThemeManager;
-import com.swe.ux.viewmodel.CanvasViewModel;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -42,6 +43,16 @@ public class CanvasPage extends JPanel {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getClassLoader().getResource("com/swe/canvas/fxml/canvas-view.fxml")
             );
+            loader.setControllerFactory(type -> {
+                if (type == CanvasController.class) {
+                    return new CanvasController(viewModel);
+                }
+                try {
+                    return type.getDeclaredConstructor().newInstance();
+                } catch (Exception ex) {
+                    throw new IllegalStateException("Failed to create controller: " + type.getName(), ex);
+                }
+            });
             Parent root = loader.load();
 
             // Create scene with the loaded FXML

@@ -6,10 +6,10 @@ import com.swe.ux.App;
 import com.swe.ux.binding.PropertyListeners;
 import com.swe.ux.theme.ThemeManager;
 import com.swe.ux.ui.*;
-import com.swe.ux.viewmodel.CanvasViewModel;
 import com.swe.ux.viewmodel.ChatViewModel;
 import com.swe.ux.viewmodel.MeetingViewModel;
 import com.swe.ux.viewmodel.ParticipantsViewModel;
+import com.swe.canvas.mvvm.CanvasViewModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

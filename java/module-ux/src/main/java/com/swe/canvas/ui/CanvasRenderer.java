@@ -1,4 +1,4 @@
-package com.swe.ux.viewmodel;
+package com.swe.canvas.ui;
 
 import com.swe.canvas.datamodel.canvas.CanvasState;
 import com.swe.canvas.datamodel.shape.Point;
@@ -60,38 +60,6 @@ public class CanvasRenderer {
                 }
             }
         }
-    }
-    
-    // Method to draw selection area box (blue dotted rectangle)
-    public void renderWithSelectionBox(CanvasState state, Shape ghostShape, ShapeId selectedShapeId, 
-                                       boolean isDraggingSelection, boolean isDrawingSelectionBox,
-                                       double selStartX, double selStartY, double selEndX, double selEndY) {
-        // First render normally
-        render(state, ghostShape, selectedShapeId, isDraggingSelection);
-        
-        // Then draw selection box if needed
-        if (isDrawingSelectionBox) {
-            drawSelectionAreaBox(selStartX, selStartY, selEndX, selEndY);
-        }
-    }
-    
-    private void drawSelectionAreaBox(double x1, double y1, double x2, double y2) {
-        double minX = Math.min(x1, x2);
-        double minY = Math.min(y1, y2);
-        double width = Math.abs(x2 - x1);
-        double height = Math.abs(y2 - y1);
-        
-        // Draw blue dotted rectangle
-        gc.setStroke(Color.CORNFLOWERBLUE);
-        gc.setLineWidth(2);
-        gc.setLineDashes(8, 6);
-        gc.strokeRect(minX, minY, width, height);
-        
-        // Fill with semi-transparent blue
-        gc.setFill(Color.rgb(100, 149, 237, 0.1));
-        gc.fillRect(minX, minY, width, height);
-        
-        gc.setLineDashes((double[]) null);
     }
 
     private void drawShape(Shape shape, double alpha) {
@@ -163,4 +131,3 @@ public class CanvasRenderer {
                 new double[] { minY, maxY, maxY }, 3);
     }
 }
-
