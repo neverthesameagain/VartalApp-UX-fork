@@ -6,6 +6,8 @@ import com.swe.canvas.mvvm.CanvasViewModel;
 import com.swe.canvas.mvvm.ToolType;
 import com.swe.canvas.ui.util.ColorConverter;
 import javafx.application.Platform;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,11 +19,14 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.geometry.Pos;
+import javafx.util.Duration;
 
 public class CanvasController {
 
@@ -36,19 +41,30 @@ public class CanvasController {
     @FXML private Button deleteBtn;
     @FXML private Canvas canvas;
     @FXML private Pane canvasContainer;
+    @FXML private VBox notificationContainer;
 
     private CanvasViewModel viewModel;
     private CanvasRenderer renderer;
     private boolean isUpdatingUI = false;
     private final Label sizeValueLabel = new Label();
 
+    public CanvasController() {
+        // Default constructor used by FXML loader
+    }
+
+    public CanvasController(CanvasViewModel viewModel) {
+        this.viewModel = viewModel;
+    }
+
     public void initialize() {
-        viewModel = new CanvasViewModel(new CanvasState());
+        if (viewModel == null) {
+            viewModel = new CanvasViewModel(new CanvasState());
+        }
         renderer = new CanvasRenderer(canvas);
 
         sizeSlider.setValue(viewModel.activeStrokeWidth.get());
         currentColorRect.setFill(viewModel.activeColor.get());
-    setupSliderValueDisplay();
+        setupSliderValueDisplay();
 
         // --- Bindings & Listeners ---
         sizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -59,7 +75,7 @@ public class CanvasController {
         });
 
         // Enable/Disable Delete button based on selection
-    deleteBtn.disableProperty().bind(viewModel.selectedShapeId.isNull());
+        deleteBtn.disableProperty().bind(viewModel.selectedShapeId.isNull());
 
         viewModel.selectedShapeId.addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
@@ -99,7 +115,10 @@ public class CanvasController {
     rectBtn.setUserData(ToolType.RECTANGLE);
     ellipseBtn.setUserData(ToolType.ELLIPSE);
     lineBtn.setUserData(ToolType.LINE);
-    triangleBtn.setUserData(ToolType.TRIANGLE);
+        triangleBtn.setUserData(ToolType.TRIANGLE);
+
+        // demo notification for initial state
+        Platform.runLater(() -> showNotification("Signed in"));
     }
 
     public CanvasViewModel getViewModel() { return viewModel; }
@@ -169,4 +188,32 @@ public class CanvasController {
     @FXML private void onCanvasMouseReleased(MouseEvent e) { viewModel.onMouseReleased(e.getX(), e.getY()); redraw(); }
     @FXML private void onUndo() { viewModel.undo(); }
     @FXML private void onRedo() { viewModel.redo(); }
+
+    public void showNotification(String message) {
+        if (notificationContainer == null) return;
+
+        Label text = new Label(message);
+        text.getStyleClass().add("notification-text");
+
+        HBox card = new HBox(text);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.getStyleClass().add("notification-card");
+
+        notificationContainer.getChildren().add(0, card);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(200), card);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.play();
+
+        PauseTransition delay = new PauseTransition(Duration.seconds(3));
+        delay.setOnFinished(evt -> {
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(250), card);
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(e -> notificationContainer.getChildren().remove(card));
+            fadeOut.play();
+        });
+        delay.play();
+    }
 }
